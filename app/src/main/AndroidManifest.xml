@@ -15,7 +15,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DriverApp"
         tools:targetApi="31">
-
+        <activity
+            android:name=".CustomerMapActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
         <!--
              TODO: Before you run your application, you need a Google Maps API key.
 
@@ -43,13 +49,6 @@
                 android:value="" />
         </activity>
         <activity
-            android:name=".MapActivity"
-            android:exported="false">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
-        <activity
             android:name=".DriverLoginActivity"
             android:exported="false">
             <meta-data
@@ -71,9 +70,10 @@
         </activity>
 
         <service
-            android:name="MyNavigationService"
+            android:name=".MyNavigationService"
             android:foregroundServiceType="location">
-        <!-- Any inner elements would go here. -->
+
+            <!-- Any inner elements would go here. -->
         </service>
     </application>
 
