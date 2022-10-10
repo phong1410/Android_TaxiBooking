@@ -13,11 +13,15 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationRequest;
+import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -44,8 +48,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.phongnguyen_20880062.driverapp.databinding.ActivityDriverMapBinding;
 
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CustomerMapActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
@@ -54,13 +60,19 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
     private LocationRequest locationRequest;
     private LocationCallback locationCallBack;
 
-    private Button mLogout;
-    private Button mRequest;
+    private Button mLogout, mRequest, mSettings;
     private LatLng pickupLocation;
 
     private Boolean requestBol = false;
 
     private Marker pickupMarker;
+
+    private LinearLayout mInfoLayout;
+
+    private SupportMapFragment mapFragment;
+
+    private ImageView mDriverProfileImage;
+    private TextView mDriverName, mDriverPhone, mDriverCar;
 
     LocationManager locationManager;
 
@@ -94,12 +106,27 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
         requestLocation();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+        mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager)
+        {
+            ActivityCompat.requestPermissions(CustomerMapActivity.this, new String[] (android.Manifest.permission.ACCESS_FINE_LOCATION));
+        }
+        else
+        {
+            mapFragment.getMapAsync(this);
+        }
+
+        mInfoLayout = (LinearLayout) findViewById(R.id.driverInfo);
+        mDriverProfileImage = (ImageView) findViewById(R.id.driverProfileImage);
+        mDriverName = (TextView) findViewById(R.id.driverName);
+        mDriverPhone = (TextView) findViewById(R.id.driverPhone);
+        mDriverCar = (TextView) findViewById(R.id.driverCar);
 
         mLogout = (Button) findViewById(R.id.logout);
         mRequest = (Button) findViewById(R.id.request);
+        mSettings = (Button) findViewById(R.id.settings);
         mLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -157,6 +184,15 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
 
                     getClosestDriver();
                 }
+            }
+        });
+
+        mSettings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(CustomerMapActivity.this, CustomerSettingsActivity.class);
+                startActivity(intent);
+                return;
             }
         });
     }

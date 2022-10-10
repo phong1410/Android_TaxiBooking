@@ -62,6 +62,8 @@ public class DriverMapActivity extends FragmentActivity implements OnMapReadyCal
 
     private String customerId = "";
 
+    private Boolean isLoggingOut = false;
+
     LocationManager locationManager;
 
     Location mLastLocation;
@@ -102,6 +104,10 @@ public class DriverMapActivity extends FragmentActivity implements OnMapReadyCal
         mLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                isLoggingOut = true;
+
+                disconnectDriver();
+
                 FirebaseAuth.getInstance().signOut();
                 Intent intent = new Intent(DriverMapActivity.this, MainActivity.class);
                 startActivity(intent);
@@ -131,7 +137,11 @@ public class DriverMapActivity extends FragmentActivity implements OnMapReadyCal
                     {
                         pickupMarker.remove();
                     }
-                    assignedCustomerPickupLocationRef.removeEventListener(assignedCustomerPickupLocationRefListener);
+
+                    if (assignedCustomerPickupLocationRefListener != null)
+                    {
+                        assignedCustomerPickupLocationRef.removeEventListener(assignedCustomerPickupLocationRefListener);
+                    }
                 }
             }
 
@@ -252,6 +262,13 @@ public class DriverMapActivity extends FragmentActivity implements OnMapReadyCal
     protected void onStop() {
         super.onStop();
 
+        if (!isLoggingOut)
+        {
+            disconnectDriver();
+        }
+    }
+
+    private void disconnectDriver() {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("driverAvailable");
 
