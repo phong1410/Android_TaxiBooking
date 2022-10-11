@@ -45,11 +45,11 @@ public class DriverLoginActivity extends AppCompatActivity {
             }
         };
 
-        mEmail = (EditText)findViewById(R.id.email);
+        mEmail = (EditText) findViewById(R.id.email);
         mPassword = (EditText) findViewById(R.id.password);
 
-        mLogin = (Button)findViewById(R.id.login);
-        mRegistration = (Button)findViewById(R.id.registration);
+        mLogin = (Button) findViewById(R.id.login);
+        mRegistration = (Button) findViewById(R.id.registration);
 
         mRegistration.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -61,9 +61,7 @@ public class DriverLoginActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (!task.isSuccessful()) {
                             Toast.makeText(DriverLoginActivity.this, "Error: Sign up failed", Toast.LENGTH_SHORT).show();
-                        }
-                        else
-                        {
+                        } else {
                             String user_id = mAuth.getCurrentUser().getUid();
                             DatabaseReference current_user_db = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id);
                             current_user_db.setValue(true);
@@ -78,10 +76,9 @@ public class DriverLoginActivity extends AppCompatActivity {
             public void onClick(View view) {
                 final String email = mEmail.getText().toString();
                 final String password = mPassword.getText().toString();
-                mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(DriverLoginActivity.this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Toast.makeText(DriverLoginActivity.this,"Error: Sign in failed", Toast.LENGTH_SHORT).show();
+                mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(DriverLoginActivity.this, task -> {
+                    if (!task.isSuccessful()) {
+                        Toast.makeText(DriverLoginActivity.this, "Error: Sign in failed", Toast.LENGTH_SHORT).show();
                     }
                 });
             }

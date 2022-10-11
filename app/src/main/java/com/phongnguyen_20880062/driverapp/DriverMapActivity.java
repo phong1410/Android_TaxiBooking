@@ -50,7 +50,7 @@ import com.phongnguyen_20880062.driverapp.databinding.ActivityDriverMapBinding;
 import java.util.List;
 import java.util.Map;
 
-public class DriverMapActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class DriverMapActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
@@ -62,7 +62,7 @@ public class DriverMapActivity extends FragmentActivity implements OnMapReadyCal
 
     private String customerId = "";
 
-    LocationManager locationManager;
+    LocationManager locationManager; // Get Current User
 
     Location mLastLocation;
 
@@ -70,33 +70,30 @@ public class DriverMapActivity extends FragmentActivity implements OnMapReadyCal
     final static String[] PERMISSIONS = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};
     final static int PERMISSIONS_ALL = 1;
 
-    @Override
-    public void onDestroy() {
-        fusedLocationClient.removeLocationUpdates(locationCallBack);
-        super.onDestroy();
-    }
-
     private ActivityDriverMapBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        binding = ActivityDriverMapBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= 23) {
-            requestPermissions(PERMISSIONS, PERMISSIONS_ALL);
-        }
-        requestLocation();
+        //binding = ActivityDriverMapBinding.inflate(getLayoutInflater());
+        setContentView(R.layout.activity_driver_map);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        // Get Current Location
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        // Get Current Location
+
+        if (Build.VERSION.SDK_INT >= 23) {
+            requestPermissions(PERMISSIONS, PERMISSIONS_ALL);
+        }
 
         mLogout = (Button) findViewById(R.id.logout);
         mLogout.setOnClickListener(new View.OnClickListener() {
@@ -110,7 +107,27 @@ public class DriverMapActivity extends FragmentActivity implements OnMapReadyCal
             }
         });
 
-        getAssignedCustomer();
+        requestLocation();
+
+        //getAssignedCustomer();
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
+        mMap.getUiSettings().setMyLocationButtonEnabled(true);
+
+        // Add a marker in Sydney and move the camera
+        LatLng sydney = new LatLng(-34, 151);
+        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+    }
+
+    @Override
+    public void onDestroy() {
+        //fusedLocationClient.removeLocationUpdates(locationCallBack);
+        super.onDestroy();
     }
 
     private void getAssignedCustomer() {
@@ -166,7 +183,7 @@ public class DriverMapActivity extends FragmentActivity implements OnMapReadyCal
                     }
 
                     LatLng driverLatLng = new LatLng(locationLat,locationLng);
-                    pickupMarker = mMap.addMarker(new MarkerOptions().position(driverLatLng).title("pickup location").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)));
+                    //pickupMarker = mMap.addMarker(new MarkerOptions().position(driverLatLng).title("pickup location").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)));
                 }
             }
 
@@ -177,16 +194,7 @@ public class DriverMapActivity extends FragmentActivity implements OnMapReadyCal
         });
     }
 
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-    }
-
+    // Get Current Location
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -202,19 +210,23 @@ public class DriverMapActivity extends FragmentActivity implements OnMapReadyCal
         }
     }
 
+    // Get Current Location
     public void requestLocation() {
         if (locationManager == null) {
             locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         }
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED) {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,10000,1000,this);
+                //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,10000,1000, (LocationListener) this);
+                return;
             }
         }
     }
 
+
     @Override
     public void onLocationChanged(@NonNull Location location) {
+        // Get Current Location
         /*Log.d("myLog","Got Location: " + location.getLatitude() + "," + location.getLongitude());
         Toast.makeText(this, "Got Location: " + location.getLatitude() + "," + location.getLongitude(), Toast.LENGTH_SHORT).show();
         locationManager.removeUpdates(this);*/
@@ -242,10 +254,6 @@ public class DriverMapActivity extends FragmentActivity implements OnMapReadyCal
                 geoFireWorking.setLocation(userId, new GeoLocation(location.getLatitude(), location.getLongitude()));
                 break;
         }
-
-
-
-
     }
 
     @Override
@@ -259,6 +267,7 @@ public class DriverMapActivity extends FragmentActivity implements OnMapReadyCal
         geoFire.removeLocation(userId);
     }
 
+    /*
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
         LocationListener.super.onStatusChanged(provider, status, extras);
@@ -272,20 +281,5 @@ public class DriverMapActivity extends FragmentActivity implements OnMapReadyCal
     @Override
     public void onProviderDisabled(@NonNull String provider) {
         LocationListener.super.onProviderDisabled(provider);
-    }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
+    }*/
 }

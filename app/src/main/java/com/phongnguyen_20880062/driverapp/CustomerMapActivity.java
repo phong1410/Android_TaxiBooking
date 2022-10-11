@@ -72,7 +72,7 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
 
     @Override
     public void onDestroy() {
-        fusedLocationClient.removeLocationUpdates(locationCallBack);
+        //fusedLocationClient.removeLocationUpdates(locationCallBack);
         super.onDestroy();
     }
 
@@ -85,18 +85,9 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
         //binding = ActivityDriverMapBinding.inflate(getLayoutInflater());
         setContentView(R.layout.activity_customer_map);
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (Build.VERSION.SDK_INT >= 23) {
             requestPermissions(PERMISSIONS, PERMISSIONS_ALL);
         }
-        requestLocation();
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
 
         mLogout = (Button) findViewById(R.id.logout);
         mRequest = (Button) findViewById(R.id.request);
@@ -151,7 +142,8 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
                     geoFire.setLocation(userId, new GeoLocation(mLastLocation.getLatitude(),mLastLocation.getLongitude()));
 
                     pickupLocation = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-                    pickupMarker = mMap.addMarker(new MarkerOptions().position(pickupLocation).title("Pickup here").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)));
+                    //pickupMarker = mMap.addMarker(new MarkerOptions().position(pickupLocation).title("Pickup here").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)));
+                    pickupMarker = mMap.addMarker(new MarkerOptions().position(pickupLocation).title("Pickup here"));
 
                     mRequest.setText("Getting your driver...");
 
@@ -159,6 +151,17 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
                 }
             }
         });
+
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+        requestLocation();
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
     }
 
     private int radius = 1;
@@ -170,7 +173,7 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
         DatabaseReference driverLocation = FirebaseDatabase.getInstance().getReference().child("driversAvailable");
 
         GeoFire geoFire = new GeoFire(driverLocation);
-        GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(pickupLocation.latitude, pickupLocation.longitude), radius);
+        geoQuery = geoFire.queryAtLocation(new GeoLocation(pickupLocation.latitude, pickupLocation.longitude), radius);
         geoQuery.removeAllListeners();
 
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
@@ -264,7 +267,9 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
                     {
                         mRequest.setText("Driver Found: " + String.valueOf(distance));
                     }
-                    mDriverMarker = mMap.addMarker(new MarkerOptions().position(driverLatLng).title("Your driver").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_car)));
+                    //mDriverMarker = mMap.addMarker(new MarkerOptions().position(driverLatLng).title("Your driver").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_car)));
+                    //mDriverMarker = mMap.addMarker(new MarkerOptions().position(driverLatLng).title("Your driver"));
+
                 }
             }
 
@@ -306,7 +311,7 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
         }
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED) {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,10000,1000,this);
+                //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,10000,1000,this);
             }
         }
     }
@@ -340,7 +345,7 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-        LocationListener.super.onStatusChanged(provider, status, extras);
+        //LocationListener.super.onStatusChanged(provider, status, extras);
     }
 
     @Override
