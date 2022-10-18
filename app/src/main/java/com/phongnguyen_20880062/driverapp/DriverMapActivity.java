@@ -281,8 +281,6 @@ public class DriverMapActivity extends AppCompatActivity implements OnMapReadyCa
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(HCMC, 15));
     }
 
-
-
     @SuppressLint("MissingPermission")
     private void GetCurrentUpdate() {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(DriverMapActivity.this);
@@ -314,10 +312,10 @@ public class DriverMapActivity extends AppCompatActivity implements OnMapReadyCa
         Toast.makeText(this, "Got Location: " + location.getLatitude() + "," + location.getLongitude(), Toast.LENGTH_SHORT).show();
         locationManager.removeUpdates(this);*/
 
-//        mLastLocation = location;
-//        LatLng lstLng = new LatLng(location.getLatitude(), location.getLongitude());
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(lstLng));
-//        mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
+        mLastLocation = location;
+        LatLng lstLng = new LatLng(location.getLatitude(), location.getLongitude());
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(lstLng));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
 
 
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -326,29 +324,31 @@ public class DriverMapActivity extends AppCompatActivity implements OnMapReadyCa
         GeoFire geoFireAvailable = new GeoFire(refAvailable);
         GeoFire geoFireWorking = new GeoFire(refWorking);
 
-        geoFireAvailable.setLocation(userId, new GeoLocation(location.getLatitude(), location.getLongitude()), new GeoFire.CompletionListener() {
-            @Override
-            public void onComplete(String key, DatabaseError error) {
-                if (error != null) {
-                    Toast.makeText(DriverMapActivity.this, "There was an error saving the location to GeoFire: ", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(DriverMapActivity.this, "Location saved on server successfully!", Toast.LENGTH_LONG).show();
-                }
-            }
-        });
+        switch (customerId)
+        {
+            case "":
+                geoFireWorking.removeLocation(userId);
+                geoFireAvailable.setLocation(userId, new GeoLocation(location.getLatitude(), location.getLongitude()));
+                break;
 
-//        switch (customerId)
-//        {
-//            case "":
-//                geoFireWorking.removeLocation(userId);
-//                geoFireAvailable.setLocation(userId, new GeoLocation(location.getLatitude(), location.getLongitude()));
-//                break;
-//
-//            default:
-//                geoFireAvailable.removeLocation(userId);
-//                geoFireWorking.setLocation(userId, new GeoLocation(location.getLatitude(), location.getLongitude()));
-//                break;
-//        }
+            default:
+                geoFireAvailable.removeLocation(userId);
+                geoFireWorking.setLocation(userId, new GeoLocation(location.getLatitude(), location.getLongitude()));
+                break;
+        }
+
+//        geoFireAvailable.setLocation(userId, new GeoLocation(location.getLatitude(), location.getLongitude()), new GeoFire.CompletionListener() {
+//            @Override
+//            public void onComplete(String key, DatabaseError error) {
+//                if (error != null) {
+//                    Toast.makeText(DriverMapActivity.this, "There was an error saving the location to GeoFire: ", Toast.LENGTH_LONG).show();
+//                } else {
+//                    Toast.makeText(DriverMapActivity.this, "Location saved on server successfully!", Toast.LENGTH_LONG).show();
+//                }
+//            }
+//        });
+
+
     }
 
     private void checkLocationPermission() {
@@ -372,8 +372,8 @@ public class DriverMapActivity extends AppCompatActivity implements OnMapReadyCa
         super.onDestroy();
     }
 
+    // Get Request Customer's ID
     private void getAssignedCustomer() {
-
         String driverId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         DatabaseReference assignedCustomerRef = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(driverId).child("customerRequest").child("customerRideId");
         assignedCustomerRef.addValueEventListener(new ValueEventListener() {
@@ -472,7 +472,6 @@ public class DriverMapActivity extends AppCompatActivity implements OnMapReadyCa
         });
     }
 
-
     private DatabaseReference assignedCustomerPickupLocationRef;
     private ValueEventListener assignedCustomerPickupLocationRefListener;
     private void getAssignedCustomerPickupLocation() {
@@ -485,7 +484,7 @@ public class DriverMapActivity extends AppCompatActivity implements OnMapReadyCa
                     List<Object> map = (List<Object>) dataSnapshot.getValue();
                     double locationLat = 0;
                     double locationLng = 0;
-                    mRequest.setText("Driver Found");
+                    //mRequest.setText("Driver Found");
                     if (map.get(0) != null)
                     {
                         locationLat = Double.parseDouble(map.get(0).toString());
@@ -538,18 +537,9 @@ public class DriverMapActivity extends AppCompatActivity implements OnMapReadyCa
         }
     }
 
-
-
-
     @Override
     protected void onStop() {
         super.onStop();
-
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("driverAvailable");
-
-        GeoFire geoFire = new GeoFire(ref);
-        geoFire.removeLocation(userId);
     }
 
     @Override
