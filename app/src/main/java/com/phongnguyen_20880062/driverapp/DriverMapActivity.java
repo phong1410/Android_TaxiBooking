@@ -131,13 +131,11 @@ public class DriverMapActivity extends AppCompatActivity implements OnMapReadyCa
             mapFragment = (SupportMapFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.map);
             mapFragment.getMapAsync(this);
-            if (isPermissionGranter)
-            {
+            if (isPermissionGranter) {
                 CheckGPS();
             }
         }
-        else
-        {
+        else {
             Toast.makeText(this, "Google Play Services not available", Toast.LENGTH_LONG).show();
         }
 
@@ -166,9 +164,9 @@ public class DriverMapActivity extends AppCompatActivity implements OnMapReadyCa
             }
         });
 
-        requestLocation();
+        //requestLocation();
 
-        //getAssignedCustomer();
+        getAssignedCustomer();
     }
 
     private void checkPermission() {
@@ -259,6 +257,11 @@ public class DriverMapActivity extends AppCompatActivity implements OnMapReadyCa
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        {
+            return;
+        }
+
         mMap.setOnMyLocationClickListener(new GoogleMap.OnMyLocationClickListener() {
             @Override
             public void onMyLocationClick(@NonNull Location location) {
@@ -284,7 +287,7 @@ public class DriverMapActivity extends AppCompatActivity implements OnMapReadyCa
     @SuppressLint("MissingPermission")
     private void GetCurrentUpdate() {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(DriverMapActivity.this);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
         {
             return;
         }

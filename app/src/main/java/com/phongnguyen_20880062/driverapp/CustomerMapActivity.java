@@ -77,7 +77,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-public class CustomerMapActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class CustomerMapActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
 
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
@@ -287,7 +287,7 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
             public void onComplete(@NonNull Task<LocationSettingsResponse> task) {
                 try {
                     LocationSettingsResponse response = task.getResult(ApiException.class);
-                    //CallDriver();
+                    CallDriver();
                 }
                 catch (ApiException e) {
                     if (e.getStatusCode() == LocationSettingsStatusCodes.RESOLUTION_REQUIRED) {
@@ -416,7 +416,7 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
                     if (mDriverMarker != null) {
                         mDriverMarker.remove();
                     }
-                    mDriverMarker = mMap.addMarker(new MarkerOptions().position(driverLatLng).title("Your driver"));
+
 
                     Location loc1 = new Location("");
                     loc1.setLatitude(pickupLocation.latitude);
@@ -435,6 +435,8 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
                     {
                         mRequest.setText("Driver Found: " + String.valueOf(distance));
                     }
+
+                    mDriverMarker = mMap.addMarker(new MarkerOptions().position(driverLatLng).title("Your driver"));
                     //mDriverMarker = mMap.addMarker(new MarkerOptions().position(driverLatLng).title("Your driver").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_car)));
                     //mDriverMarker = mMap.addMarker(new MarkerOptions().position(driverLatLng).title("Your driver"));
 
@@ -452,6 +454,11 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        {
+            return;
+        }
 
         mMap.setOnMyLocationClickListener(new GoogleMap.OnMyLocationClickListener() {
             @Override
@@ -537,7 +544,7 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
         LocationListener.super.onProviderDisabled(provider);
     }
 
-    @Override
+/*    @Override
     public void onConnected(@Nullable Bundle bundle) {
 
     }
@@ -550,7 +557,7 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
-    }
+    }*/
 
     @Override
     public void onDestroy() {
